@@ -3,16 +3,31 @@
  * Human-ish cursor: variable speed, overshoot, pauses, circles, slider drag.
  */
 import { chromium } from "playwright";
+import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const OUT_DIR = path.join(__dirname, "playwright-video");
 const FINAL = path.join(__dirname, "Milecast-Interactive-Walkthrough.mp4");
+const TIMELINE = path.join(__dirname, "timeline.json");
 const APP = process.env.MILECAST_URL || "http://127.0.0.1:3000";
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const rand = (a, b) => a + Math.random() * (b - a);
+
+let t0 = 0;
+const cues = [];
+function cue(id, note, cursor) {
+  const sec = Number(((Date.now() - t0) / 1000).toFixed(2));
+  cues.push({ t: sec, id, note, cursor });
+  console.log(`CUE ${sec.toFixed(2)}s  ${id} — ${note}`);
+}
+function fmt(sec) {
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60);
+  return `${m}:${String(s).padStart(2, "0")}`;
+}
 
 async function humanMove(page, x, y, { steps } = {}) {
   const n = steps ?? Math.floor(rand(18, 42));
@@ -111,18 +126,24 @@ async function main() {
   const page = await context.newPage();
   await page.goto(APP, { waitUntil: "networkidle", timeout: 60000 });
   await injectCursor(page);
+  t0 = Date.now();
+  cue("start", "Page loaded, cursor appears", "idle center / top-left drift");
   await sleep(2800);
 
   // Brand / intro gestures — room to talk
+  cue("brand_move", "Cursor moves to Milecast logo", "slow move → logo");
   await humanMove(page, 80, 60, { steps: 40 });
   await sleep(900);
   await circle(page, 90, 70, 22);
+  cue("brand_label", "On-screen label: Milecast", "circle around logo");
   await label(page, "Milecast", 3200);
   await sleep(rand(1400, 2000));
+  cue("headline", "Cursor to headline / what this app does", "move + wobble on headline");
   await humanMove(page, 420, 160, { steps: 48 });
   await wobble(page, 420, 160);
   await label(page, "what this app does", 3500);
   await sleep(1600);
+  cue("stack_badge", "Cursor to React + Django badge", "move + circle top-right");
   await humanMove(page, 1180, 55, { steps: 50 });
   await circle(page, 1180, 55, 18);
   await label(page, "React + Django", 3000);
@@ -137,6 +158,7 @@ async function main() {
   const build = page.getByRole("button", { name: /Build weather-aware plan/i });
 
   let p = await boxCenter(origin);
+  cue("origin", "Click + type Origin (Denver)", "move to Origin → click → type");
   await humanMove(page, p.x - 40, p.y - 30, { steps: 22 });
   await humanMove(page, p.x, p.y, { steps: 14 });
   await page.mouse.click(p.x, p.y);
@@ -146,6 +168,7 @@ async function main() {
   await sleep(1400);
 
   p = await boxCenter(dest);
+  cue("destination", "Click + type Destination (Kansas City)", "move to Destination → click → type");
   await humanMove(page, p.x + rand(-20, 40), p.y - 20, { steps: 34 });
   await sleep(500);
   await humanMove(page, p.x, p.y, { steps: 14 });
@@ -156,6 +179,7 @@ async function main() {
   await sleep(1200);
 
   p = await boxCenter(weight);
+  cue("weight", "Click + type load weight 28000", "move to Load weight → type");
   await humanMove(page, p.x, p.y, { steps: 30 });
   await page.mouse.click(p.x, p.y);
   await label(page, "load weight", 2400);
@@ -164,6 +188,7 @@ async function main() {
   await sleep(1500);
 
   p = await boxCenter(spacing);
+  cue("spacing", "Set checkpoint spacing to 50 miles", "click select → choose 50");
   await humanMove(page, p.x, p.y, { steps: 26 });
   await page.mouse.click(p.x, p.y);
   await sleep(700);
@@ -172,6 +197,7 @@ async function main() {
   await sleep(1200);
 
   // Risk rules panel — wander down list
+  cue("risk_rules", "Point through PDF risk rules panel", "slow wander down right panel");
   await humanMove(page, 1100, 280, { steps: 42 });
   await label(page, "PDF risk rules", 2800);
   for (const y of [320, 370, 420, 470, 520]) {
@@ -179,6 +205,7 @@ async function main() {
     await sleep(rand(700, 1200));
   }
   await circle(page, 1100, 480, 26);
+  cue("load_wind", "Circle heavy-load / wind rule", "circle bottom of rules list");
   await label(page, "heavy load + wind", 3200);
   await sleep(1600);
 
@@ -188,10 +215,12 @@ async function main() {
   const startX = box.x + 8;
   const endX = box.x + box.width * 0.55;
   const midY = box.y + box.height / 2;
+  cue("slider_arrive", "Cursor arrives on forecast slider", "move onto slider thumb");
   await humanMove(page, startX - 30, midY - 40, { steps: 20 });
   await humanMove(page, startX, midY, { steps: 10 });
   await label(page, "0–48h forecast slider", 3000);
   await sleep(1000);
+  cue("slider_drag", "Dragging slider left → right", "mouse down + uneven drag");
   await page.mouse.move(startX, midY);
   await page.mouse.down();
   await page.evaluate(() => {
@@ -217,9 +246,11 @@ async function main() {
     const c = document.getElementById("milecast-cursor");
     if (c) c.classList.remove("down");
   });
+  cue("slider_explain", "After drag — explain forecast window", "rest on slider");
   await label(page, "drag to shift forecast window", 3200);
   await sleep(1400);
   // drag back toward 0 for clean plan
+  cue("slider_reset", "Drag slider back toward 0h", "drag right → left");
   await page.mouse.move(endX, midY, { steps: 10 });
   await page.mouse.down();
   await page.mouse.move(startX + 4, midY, { steps: 36 });
@@ -228,6 +259,7 @@ async function main() {
 
   // Build
   p = await boxCenter(build);
+  cue("build_hover", "Hover Build weather-aware plan button", "approach + wobble on CTA");
   await humanMove(page, p.x - 50, p.y + 30, { steps: 24 });
   await sleep(700);
   await humanMove(page, p.x, p.y, { steps: 28 });
@@ -239,12 +271,14 @@ async function main() {
     (res) => res.url().includes("/api/plan") && res.request().method() === "POST",
     { timeout: 120000 },
   );
+  cue("build_click", "Click Build — waiting on live API", "click CTA → idle micro-moves");
   await page.mouse.click(p.x, p.y);
   let planOk = false;
   try {
     const res = await planWait;
     planOk = res.ok();
     console.log("plan status", res.status());
+    cue("plan_api", `API /api/plan returned ${res.status()}`, "waiting near button");
   } catch (err) {
     console.log("plan wait failed", String(err));
   }
@@ -289,6 +323,7 @@ async function main() {
   }
 
   await sleep(2200);
+  cue("results", "Three corridors visible", "results heading in view");
   await label(page, "three corridors back", 3000);
   await sleep(1600);
 
@@ -298,6 +333,7 @@ async function main() {
   const map = page.locator(".map-shell");
   if (await map.count()) {
     const m = await boxCenter(map);
+    cue("map", "Corridor heatmap — slow trace", "trace along green corridor");
     await humanMove(page, m.x - 120, m.y - 80, { steps: 36 });
     await label(page, "corridor heatmap", 3000);
     await sleep(1000);
@@ -312,6 +348,7 @@ async function main() {
       await sleep(rand(140, 280));
     }
     await sleep(800);
+    cue("map_hops", "Faster hops between checkpoints", "quick hops on map dots");
     // quick hops to checkpoints
     for (let i = 0; i < 4; i++) {
       await humanMove(page, m.x - 80 + i * 55, m.y + rand(-30, 30), { steps: 8 });
@@ -329,6 +366,11 @@ async function main() {
     const card = cards.nth(i);
     await card.scrollIntoViewIfNeeded();
     const c = await boxCenter(card);
+    cue(
+      `card_${i}`,
+      i === 1 ? "Hover + click recommended corridor" : `Hover route card ${i + 1}`,
+      i === 1 ? "circle recommended → click" : "hover alternative card",
+    );
     await humanMove(page, c.x - 60, c.y - 40, { steps: Math.floor(rand(22, 40)) });
     await sleep(600);
     await humanMove(page, c.x, c.y, { steps: 14 });
@@ -348,6 +390,7 @@ async function main() {
   const details = page.locator("details").nth(1);
   if (await details.count()) {
     const d = await boxCenter(details.locator("summary"));
+    cue("checkpoints", "Open checkpoint ETAs details", "click summary → scan list");
     await humanMove(page, d.x, d.y, { steps: 26 });
     await label(page, "checkpoint ETAs", 2800);
     await page.mouse.click(d.x, d.y);
@@ -361,6 +404,7 @@ async function main() {
   // Ranking explanation dwell on recommended card
   if (count > 1) {
     const rec = await boxCenter(cards.nth(1));
+    cue("ranking", "Point at ranking logic on recommended card", "circle recommended card");
     await humanMove(page, rec.x - 40, rec.y - 30, { steps: 28 });
     await circle(page, rec.x, rec.y, 36);
     await label(page, "severe → high → avg risk → time", 4000);
@@ -371,6 +415,7 @@ async function main() {
   await page.locator("#forecast").scrollIntoViewIfNeeded();
   await sleep(1000);
   p = await boxCenter(slider);
+  cue("slider_live", "Second slider nudge — live refresh", "drag slider after plan built");
   await humanMove(page, p.box.x + 20, p.y, { steps: 32 });
   await label(page, "nudge forecast… refreshes live", 3400);
   await sleep(900);
@@ -384,12 +429,14 @@ async function main() {
   }
   await page.mouse.up();
   await sleep(3500);
+  cue("refresh_wait", "Waiting while corridor refreshes", "idle after slider release");
   await label(page, "waiting on live refresh…", 2500);
   await sleep(5000);
 
   // Compare cards once more after refresh
   await results.scrollIntoViewIfNeeded().catch(() => null);
   await sleep(1200);
+  cue("compare", "Compare corridor cards after refresh", "hover Prairie then Ridge");
   if (count > 0) {
     const c0 = await boxCenter(cards.nth(0));
     await humanMove(page, c0.x, c0.y, { steps: 24 });
@@ -404,13 +451,16 @@ async function main() {
   // Footer
   await page.evaluate(() => window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" }));
   await sleep(1600);
+  cue("providers", "Footer providers text", "point at Nominatim / OSRM / Open-Meteo");
   await humanMove(page, 200, 820, { steps: 34 });
   await label(page, "Nominatim · OSRM · Open-Meteo", 3600);
   await sleep(1400);
   await humanMove(page, 720, 450, { steps: 40 });
   await sleep(2200);
+  cue("end", "Thanks / end card moment", "drift center, wrap up");
   await label(page, "thanks for watching", 3800);
   await sleep(2800);
+  cue("stop", "Recording end", "fade / stop");
 
   const videoPath = await page.video().path();
   await context.close();
@@ -427,7 +477,16 @@ async function main() {
     console.error(res.stderr);
     throw new Error("ffmpeg remux failed");
   }
+
+  const duration = cues.length ? cues[cues.length - 1].t : 0;
+  const stamped = cues.map((c, i) => {
+    const next = cues[i + 1];
+    const end = next ? next.t : duration;
+    return { ...c, end, slot: `${fmt(c.t)}–${fmt(end)}` };
+  });
+  fs.writeFileSync(TIMELINE, JSON.stringify({ duration, cues: stamped }, null, 2));
   console.log("WROTE", FINAL);
+  console.log("TIMELINE", TIMELINE);
 }
 
 main().catch((err) => {
