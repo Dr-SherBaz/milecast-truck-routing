@@ -1,0 +1,28 @@
+# Dependencies and build output
+node_modules/
+.next/
+out/
+
+# Python caches and test output
+__pycache__/
+.pytest_cache/
+*.py[cod]
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+
+# Local logs
+*.log
+
+# Assessment source material and reference repositories
+fs-assessment-spotter.pdf
+fs-assessment-spotter.txt
+reference/
+
+# Editor and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
