@@ -1,36 +1,39 @@
-# Assessment deliverables checklist
+# Assessment deliverables
 
-## 1. GitHub repository
+## 1. GitHub repository — done
+
+Public repo: https://github.com/Dr-SherBaz/milecast-truck-routing
+
+## 2. Hosted application — live demo tunnel
+
+While this machine keeps the local servers running:
+
+**App URL:** https://varying-centuries-allow-edmonton.trycloudflare.com
+
+That URL proxies the Next.js UI; `/api/plan` is rewritten to the local Django API.
+
+To restart the hosted demo later:
 
 ```powershell
-cd C:\Users\Sher_\Desktop\spotter-truck-routing-assessment
-git add app README.md DELIVERABLES.md docker-compose.yml .gitignore
-git status
-# After you approve a commit message, create the commit, then:
-# gh repo create milecast-truck-routing --private --source=. --remote=origin --push
+cd app\backend
+python manage.py runserver 0.0.0.0:8000
+
+cd ..\frontend
+npm run dev -- -H 0.0.0.0 -p 3000
+
+..\..\tools\cloudflared.exe tunnel --url http://127.0.0.1:3000
 ```
 
-## 2. Hosted application
+For a permanent host (Render/Vercel/Railway), use `docker-compose.yml` or deploy API + web separately and set `CORS_ALLOWED_ORIGINS` / `NEXT_PUBLIC_API_URL`.
 
-Option A — Docker:
+## 3. Walkthrough video — voiceover-ready
 
-```powershell
-docker compose up --build
-```
+Silent demo MP4 (import and narrate):
 
-Option B — Managed hosts:
+`walkthrough/Milecast-Walkthrough-VOICEOVER-READY.mp4`
 
-- API: Railway / Render / Fly — run `gunicorn config.wsgi:application`
-- UI: Vercel — set `NEXT_PUBLIC_API_URL` to the public API URL and allow that origin in `CORS_ALLOWED_ORIGINS`
+Script with timestamps:
 
-## 3. Loom walkthrough (5–10 min)
+`walkthrough/VOICEOVER_SCRIPT.md`
 
-Suggested script:
-
-1. Show the PDF requirements briefly
-2. Enter origin / destination / departure / load weight
-3. Build plan — point out three corridors on the map
-4. Open checkpoint details and risk badges
-5. Drag the 0–48h forecast slider and show heatmap refresh
-6. Explain recommendation order (severe → high → average risk → time)
-7. Mention Django API + Nominatim / OSRM|ORS / Open-Meteo
+Record your voice in CapCut / Descript / Loom over that file (or do a live Loom using the hosted URL and the script).

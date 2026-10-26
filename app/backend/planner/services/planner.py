@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta, timezone
 
 from .geocoding import geocode_place
@@ -37,16 +38,20 @@ def build_plan(
     if len(drafts) != 3:
         raise RuntimeError("Planner must produce exactly three route alternatives")
 
-    routes = [
-        _enrich_route(
-            draft=draft,
-            departure=departure_time,
-            interval=checkpoint_interval_miles,
-            load_weight_lb=load_weight_lb,
-            forecast_offset_hours=forecast_offset_hours,
-        )
-        for draft in drafts
-    ]
+    with ThreadPoolExecutor(max_workers=3) as pool:
+        futures = [
+            pool.submit(
+                _enrich_route,
+                draft=draft,
+                departure=departure_time,
+                interval=checkpoint_interval_miles,
+                load_weight_lb=load_weight_lb,
+                forecast_offset_hours=forecast_offset_hours,
+            )
+            for draft in drafts
+        ]
+        routes = [future.result() for future in futures]
+
     ranked = rank_routes(routes)
     recommended = ranked[0]
     heatmap = []
@@ -85,12 +90,25 @@ def _enrich_route(
     if not miles or miles[-1] != round(draft.distance_miles):
         miles.append(round(draft.distance_miles, 1))
 
-    checkpoints = []
+    pending: list[tuple[float, float, float, datetime]] = []
     for mile in miles:
         fraction = min(mile / draft.distance_miles, 1.0) if draft.distance_miles else 1.0
         eta = departure + timedelta(minutes=draft.duration_minutes * fraction) + timedelta(hours=forecast_offset_hours)
         lat, lon = interpolate_coordinates(draft.coordinates, fraction)
-        weather = forecast_at(lat, lon, eta)
+        pending.append((mile, lat, lon, eta))
+
+    weather_by_index: dict[int, object] = {}
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        future_map = {
+            pool.submit(forecast_at, lat, lon, eta): index
+            for index, (_mile, lat, lon, eta) in enumerate(pending)
+        }
+        for future in as_completed(future_map):
+            weather_by_index[future_map[future]] = future.result()
+
+    checkpoints = []
+    for index, (mile, lat, lon, eta) in enumerate(pending):
+        weather = weather_by_index[index]
         risk = classify_weather(weather, load_weight_lb)
         checkpoints.append(
             {

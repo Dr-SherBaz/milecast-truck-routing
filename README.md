@@ -61,9 +61,11 @@ npm run build
 
 ## Deliverables
 
-- Source in this repository (`app/`)
-- Hosting: deploy Django (gunicorn) + Next.js (`npm run build && npm start`), or use `docker compose up --build`
-- Loom: record a 5–10 minute walkthrough of inputs → three routes → risk rules → map heatmap → forecast slider → recommendation
+See `DELIVERABLES.md` for the live links.
+
+- GitHub: https://github.com/Dr-SherBaz/milecast-truck-routing
+- Hosted demo (Cloudflare tunnel while local servers run): see `DELIVERABLES.md`
+- Voiceover-ready walkthrough video: `walkthrough/Milecast-Walkthrough-VOICEOVER-READY.mp4` + `walkthrough/VOICEOVER_SCRIPT.md`
 
 ## Design notes
 

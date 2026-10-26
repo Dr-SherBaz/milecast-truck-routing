@@ -21,6 +21,13 @@ spotter-truck-routing-frontend/
 # Local logs
 *.log
 
+# Local tooling / tunnels / walkthrough working files
+tools/
+walkthrough/clips/
+walkthrough/frames/
+walkthrough/concat.txt
+app/frontend/.env.local
+
 # Assessment source material and reference repositories
 fs-assessment-spotter.pdf
 fs-assessment-spotter.txt
