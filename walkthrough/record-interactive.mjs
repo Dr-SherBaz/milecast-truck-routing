@@ -38,15 +38,15 @@ async function circle(page, x, y, r = 28) {
 async function injectCursor(page) {
   await page.addStyleTag({
     content: `
+      html, body, * { cursor: none !important; }
       #milecast-cursor {
-        position: fixed; z-index: 2147483647; width: 22px; height: 22px;
-        margin-left: -2px; margin-top: -2px; pointer-events: none;
-        border-radius: 50% 50% 50% 0; transform: rotate(-35deg);
-        background: #111; border: 2px solid #fff;
-        box-shadow: 0 2px 8px rgba(0,0,0,.45);
-        transition: width .08s, height .08s;
+        position: fixed; z-index: 2147483647; width: 28px; height: 28px;
+        left: 0; top: 0; pointer-events: none;
+        transform: translate(0, 0);
+        filter: drop-shadow(1px 1px 1px rgba(0,0,0,.35));
       }
-      #milecast-cursor.down { width: 16px; height: 16px; background: #c45c26; }
+      #milecast-cursor svg { display: block; width: 28px; height: 28px; }
+      #milecast-cursor.down { transform: scale(0.92); transform-origin: 2px 2px; }
       #milecast-cursor-label {
         position: fixed; z-index: 2147483647; pointer-events: none;
         font: 600 12px/1.2 "Segoe UI", sans-serif; color: #13202c;
@@ -59,6 +59,12 @@ async function injectCursor(page) {
   await page.evaluate(() => {
     const c = document.createElement("div");
     c.id = "milecast-cursor";
+    // Classic OS arrow pointer (tip at top-left)
+    c.innerHTML = `
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M4 2 L4 18 L8.2 14.3 L11.2 21.5 L13.6 20.5 L10.5 13.2 L16 13 Z"
+          fill="#000" stroke="#fff" stroke-width="1.4" stroke-linejoin="round"/>
+      </svg>`;
     const lab = document.createElement("div");
     lab.id = "milecast-cursor-label";
     document.body.append(c, lab);
@@ -66,8 +72,8 @@ async function injectCursor(page) {
       c.style.left = `${x}px`;
       c.style.top = `${y}px`;
       c.classList.toggle("down", !!down);
-      lab.style.left = `${x + 18}px`;
-      lab.style.top = `${y + 18}px`;
+      lab.style.left = `${x + 20}px`;
+      lab.style.top = `${y + 20}px`;
     };
     window.__mcLabel = (text) => {
       lab.textContent = text || "";
@@ -75,7 +81,7 @@ async function injectCursor(page) {
     };
     window.addEventListener(
       "mousemove",
-      (e) => window.__mcCursor(e.clientX, e.clientY, false),
+      (e) => window.__mcCursor(e.clientX, e.clientY, e.buttons === 1),
       true,
     );
   });
