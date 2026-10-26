@@ -26,6 +26,12 @@ tools/
 walkthrough/clips/
 walkthrough/frames/
 walkthrough/concat.txt
+walkthrough/playwright-video/
+walkthrough/node_modules/
+walkthrough/package-lock.json
+walkthrough/package.json
+walkthrough/debug-*.png
+walkthrough/record.*.log
 app/frontend/.env.local
 
 # Assessment source material and reference repositories
