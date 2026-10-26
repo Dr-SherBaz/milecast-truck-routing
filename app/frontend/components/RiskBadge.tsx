@@ -1,4 +1,11 @@
+import { formatRisk, RISK_COLORS } from "@/lib/risk";
 import type { RiskLevel } from "@/lib/types";
 
-const labels: Record<RiskLevel, string> = { low: "Low", moderate: "Moderate", high: "High", severe: "Severe", no_travel: "No travel" };
-export function RiskBadge({ level }: { level: RiskLevel }) { return <span className={`risk risk-${level}`}>{labels[level]}</span>; }
+export function RiskBadge({ level }: { level: RiskLevel | string }) {
+  const color = RISK_COLORS[(level as RiskLevel)] ?? "#64748b";
+  return (
+    <span className="risk-badge" style={{ ["--risk" as string]: color }}>
+      {formatRisk(level)}
+    </span>
+  );
+}

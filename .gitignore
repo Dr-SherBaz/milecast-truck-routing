@@ -7,6 +7,11 @@ out/
 __pycache__/
 .pytest_cache/
 *.py[cod]
+db.sqlite3
+staticfiles/
+
+# Separate experiment UI (not part of Milecast submission)
+spotter-truck-routing-frontend/
 
 # Local environment and secrets
 .env

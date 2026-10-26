@@ -1,12 +1,30 @@
-# Routing API
+# Milecast API (Django)
 
-Independent FastAPI implementation for the assessment. It uses deterministic mock routing and weather providers by default so local development and tests do not require credentials. Provider interfaces can be replaced with official routing/geocoding/weather adapters without changing the planning contract.
+Django + Django REST Framework backend for the Spotter weather-aware truck routing assessment.
+
+## Endpoints
+
+- `GET /health`
+- `POST /api/plan`
+
+## Providers
+
+- Geocoding: OpenStreetMap Nominatim
+- Routing: OpenRouteService HGV when `ORS_API_KEY` is set, otherwise OSRM public with detour padding to guarantee three alternatives
+- Weather: Open-Meteo hourly forecast at each checkpoint ETA
 
 ## Run
 
 ```powershell
-C:\Users\Sher\AppData\Local\Programs\Python\Python312\python.exe -m pip install -r requirements.txt
-C:\Users\Sher\AppData\Local\Programs\Python\Python312\python.exe -m uvicorn app.main:app --reload
+cd app/backend
+python -m pip install -r requirements.txt
+copy .env.example .env
+python manage.py migrate
+python manage.py runserver 8000
 ```
 
-Endpoint: `POST /api/plan`. The request accepts `origin`, `destination`, ISO `departure_time`, `load_weight_lb`, `checkpoint_interval_miles` (10, 25, or 50), and `forecast_offset_hours` (0–48).
+## Tests
+
+```powershell
+python -m pytest
+```

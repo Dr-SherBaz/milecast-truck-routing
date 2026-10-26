@@ -1,14 +1,21 @@
-# Routewise frontend
+# Milecast UI
 
-Independent Next.js/React UI for the weather-aware truck-routing assessment.
+Next.js / React client for the Spotter weather-aware truck routing assessment.
+
+## Features
+
+- Origin, destination, departure time, load weight
+- Checkpoint spacing 10 / 25 / 50 miles
+- Live 0–48 hour forecast slider that re-plans the corridor
+- Leaflet map with risk-colored corridor heatmap segments
+- Route cards with severe / high / no-travel miles and checkpoint ETAs
 
 ## Run
 
 ```powershell
+cd app/frontend
 npm install
 npm run dev
 ```
 
-Set `NEXT_PUBLIC_API_URL` in `.env.local` when the API is not running at `http://localhost:8000`.
-
-The interface works with the backend's deterministic mock providers. It renders three route alternatives, checkpoint risk, ETA-aware weather, route recommendation, a Leaflet map, a corridor heatmap, and an explicit 0–48 hour forecast slider.
+Open http://localhost:3000 with the Django API on port 8000.

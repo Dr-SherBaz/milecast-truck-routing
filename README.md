@@ -1,32 +1,37 @@
-# Weather-Aware Truck Routing Assessment
+# Milecast — Weather-Aware Truck Routing
 
-This is an independent implementation of the supplied assessment brief. The two supplied GitHub repositories are preserved under `reference/` for comparison only; the application under `app/` was built separately and does not copy their implementation.
+Independent Spotter full-stack assessment build: **React (Next.js) + Django REST**.
 
-## What the assessment asks for
+Drivers enter origin, destination, departure time, and load weight. The app builds **three** corridor alternatives, samples weather every **10 / 25 / 50** miles at each checkpoint ETA, applies the PDF wind/rain/snow and load rules, recommends a route (severe → high → average risk → time), and shows a **corridor weather heatmap** with a live **0–48 hour** forecast slider.
 
-The PDF requires a React + Django-style full-stack application that accepts origin, destination, departure date/time, and load weight; creates exactly three route alternatives; samples weather every 10, 25, or 50 miles at the truck's ETA; applies wind/rain/snow and load rules; ranks routes by severe miles, high-risk miles, average risk, then travel time; and presents routes, checkpoints, summaries, a map, and a 0–48 hour forecast heatmap slider.
+## Why this stack
+
+The brief asks for React + Django. This implementation uses Django + DRF for the API and Next.js for the React UI. Routing/geocoding/weather use public providers (no routing engine built in-house).
 
 ## Workspace
 
-- `fs-assessment-spotter.pdf` — source brief
-- `fs-assessment-spotter.txt` — extracted text used during implementation
-- `reference/` — supplied repositories, isolated and read-only
-- `app/backend/` — independent FastAPI service
-- `app/frontend/` — independent Next.js/React client
+| Path | Role |
+|------|------|
+| `fs-assessment-spotter.pdf` | Source brief |
+| `app/backend/` | Django API (submission) |
+| `app/frontend/` | Next.js UI (submission) |
+| `reference/` | Supplied repos kept for comparison only |
 
-The PDF says Django, while this implementation uses FastAPI for a smaller typed API boundary. This is an implementation choice, not copied code; the behavior and deliverables remain aligned with the brief.
+Brand: **Milecast** — unique UI and service layout, not a copy of the reference apps.
 
-## Run locally
+## Quick start
 
-Start the API:
+Terminal 1 — API:
 
 ```powershell
 cd app/backend
-C:\Users\Sher\AppData\Local\Programs\Python\Python312\python.exe -m pip install -r requirements.txt
-C:\Users\Sher\AppData\Local\Programs\Python\Python312\python.exe -m uvicorn app.main:app --reload
+python -m pip install -r requirements.txt
+copy .env.example .env
+python manage.py migrate
+python manage.py runserver 8000
 ```
 
-Start the UI in another terminal:
+Terminal 2 — UI:
 
 ```powershell
 cd app/frontend
@@ -34,12 +39,34 @@ npm install
 npm run dev
 ```
 
-Open `http://localhost:3000`. No API credentials are required: deterministic mock routing and weather providers are enabled by default. Production adapters should use official providers and environment variables documented in `.env.example` files; secrets are never committed.
+Open http://localhost:3000
+
+Optional: set `ORS_API_KEY` in `app/backend/.env` for OpenRouteService HGV routing. Without it, the API uses OSRM and guarantees three alternatives.
+
+## Providers
+
+- Geocoding: Nominatim
+- Routing: OpenRouteService (optional key) or OSRM
+- Weather: Open-Meteo hourly at checkpoint ETA
 
 ## Validation
 
-Backend tests are in `app/backend/tests/` and cover threshold boundaries, load overrides, exact route count, checkpoint interval behavior, and forecast validation. Frontend production validation is `npm run build`; lint is `npm run lint`.
+```powershell
+cd app/backend
+python -m pytest
 
-## Deliberate limitations
+cd ../frontend
+npm run build
+```
 
-The local provider mode uses deterministic synthetic coordinates and weather, so it demonstrates the complete product flow but is not a live dispatch system. Before hosting, connect official geocoding/routing/weather services, add rate limits and observability, and verify road restrictions with authoritative advisories. GitHub publishing, hosting, and the Loom walkthrough remain separate deployment steps requiring explicit approval.
+## Deliverables
+
+- Source in this repository (`app/`)
+- Hosting: deploy Django (gunicorn) + Next.js (`npm run build && npm start`), or use `docker compose up --build`
+- Loom: record a 5–10 minute walkthrough of inputs → three routes → risk rules → map heatmap → forecast slider → recommendation
+
+## Design notes
+
+- Risk thresholds and load overrides match the PDF exactly
+- No-travel miles outrank severe miles when sorting
+- Forecast slider re-queries the API so the corridor heatmap updates live

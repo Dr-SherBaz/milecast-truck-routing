@@ -1,18 +1,18 @@
 {
-  "name": "weather-aware-truck-routing",
+  "name": "milecast-frontend",
   "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "lint": "next lint"
+    "lint": "next lint",
+    "start": "next start"
   },
   "dependencies": {
     "leaflet": "1.9.4",
     "next": "^15.5.28",
     "react": "19.1.0",
-    "react-dom": "19.1.0",
-    "react-leaflet": "5.0.0"
+    "react-dom": "19.1.0"
   },
   "devDependencies": {
     "@types/leaflet": "^1.9.18",

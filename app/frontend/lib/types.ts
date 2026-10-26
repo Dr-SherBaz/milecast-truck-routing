@@ -6,7 +6,12 @@ export type Checkpoint = {
   longitude: number;
   eta: string;
   forecast_offset_hours: number;
-  weather: { wind_mph: number; rain_in_hr: number; snow_in_hr: number; temperature_f: number };
+  weather: {
+    wind_mph: number;
+    rain_in_hr: number;
+    snow_in_hr: number;
+    temperature_f: number;
+  };
   risk_level: RiskLevel;
   risk_score: number;
   risk_reasons: string[];
@@ -19,14 +24,40 @@ export type Route = {
   duration_minutes: number;
   coordinates: [number, number][];
   checkpoints: Checkpoint[];
-  summary: { low_miles: number; moderate_miles: number; high_miles: number; severe_miles: number; no_travel_miles: number; average_risk: number };
+  summary: {
+    low_miles: number;
+    moderate_miles: number;
+    high_miles: number;
+    severe_miles: number;
+    no_travel_miles: number;
+    average_risk: number;
+  };
 };
 
 export type Plan = {
-  request: { origin: string; destination: string; departure_time: string; load_weight_lb: number; checkpoint_interval_miles: number; forecast_offset_hours: number };
+  request: {
+    origin: string;
+    destination: string;
+    departure_time: string;
+    load_weight_lb: number;
+    checkpoint_interval_miles: number;
+    forecast_offset_hours: number;
+    resolved_origin?: string;
+    resolved_destination?: string;
+  };
   routes: Route[];
   recommended_route_id: string;
   recommendation_reason: string;
   corridor_heatmap: Checkpoint[];
   forecast_window_hours: number;
+  provider_mode?: string;
+};
+
+export type PlanInput = {
+  origin: string;
+  destination: string;
+  departure_time: string;
+  load_weight_lb: number;
+  checkpoint_interval_miles: number;
+  forecast_offset_hours: number;
 };
