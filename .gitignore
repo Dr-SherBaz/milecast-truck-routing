@@ -32,6 +32,8 @@ walkthrough/package-lock.json
 walkthrough/package.json
 walkthrough/debug-*.png
 walkthrough/record.*.log
+!walkthrough/timeline.json
+walkthrough/*.mp4
 app/frontend/.env.local
 
 # Assessment source material and reference repositories

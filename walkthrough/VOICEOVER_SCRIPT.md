@@ -2,8 +2,7 @@
 
 *<u>Loom (final submission):</u>* https://www.loom.com/share/aa883cfe822f45c0be7f98c62dc52e5c
 
-*Local cut:* `walkthrough/Milecast-Interactive-Walkthrough.mp4` *(~3:20)*  
-*Cue source:* `walkthrough/timeline.json` *(logged live during this exact recording)*
+*Cue source:* `walkthrough/timeline.json` *(logged during the recording used for the Loom)*
 
 *Speak loose. Don’t chase perfect grammar. Start each block when the slot starts — the cursor is already doing the thing listed under Cursor.*
 

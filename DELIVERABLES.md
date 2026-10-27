@@ -31,8 +31,5 @@ For a permanent host (Render/Vercel/Railway), use `docker-compose.yml` or deploy
 **Loom (submission link):**  
 https://www.loom.com/share/aa883cfe822f45c0be7f98c62dc52e5c
 
-Local source cut (optional):  
-`walkthrough/Milecast-Interactive-Walkthrough.mp4`
-
 Timed voiceover script used for the recording:  
 `walkthrough/VOICEOVER_SCRIPT.md`

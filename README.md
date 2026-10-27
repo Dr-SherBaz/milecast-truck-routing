@@ -66,7 +66,7 @@ See `DELIVERABLES.md` for the live links.
 - GitHub: https://github.com/Dr-SherBaz/milecast-truck-routing
 - Hosted demo (Cloudflare tunnel while local servers run): see `DELIVERABLES.md`
 - **Loom walkthrough:** https://www.loom.com/share/aa883cfe822f45c0be7f98c62dc52e5c
-- Script / local cut: `walkthrough/VOICEOVER_SCRIPT.md`, `walkthrough/Milecast-Interactive-Walkthrough.mp4`
+- Script: `walkthrough/VOICEOVER_SCRIPT.md`
 
 ## Design notes
 
